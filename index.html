@@ -3,70 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PROYECTO OMAR Generador de Disposiciones de libertad por CEE ATÍPICO</title>
+    <title>Fiscalía Digital - Generador de Libertad</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.28.5/docxtemplater.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
-    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        body { max-width: 900px; margin: auto; padding: 20px; background-color: #f4f7f6; }
+        header { text-align: center; margin-bottom: 30px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full-width { grid-column: 1 / -1; }
+        button { width: 100%; padding: 15px; background-color: #0056b3; color: white; border: none; cursor: pointer; font-size: 1.1em; }
+        button:hover { background-color: #004494; }
+        .reset-btn { background-color: #6c757d; margin-top: 10px; }
+        label { font-weight: bold; margin-top: 10px; display: block; }
+    </style>
 </head>
 <body>
+
     <header>
-        <h1> PROYECTO OMAR Generador de Disposiciones de libertad por CEE ATÍPICO</h1>
-        <p>Complete los campos para generar el documento basado en el <strong>Modelo 3</strong>.</p>
+        <h1>⚖️ Generador de Disposición de Libertad</h1>
+        <p>Modelo actualizado con campo de <strong>DNI</strong></p>
     </header>
 
-    <main>
-        <form id="docForm">
-            <div class="row">
-                <div class="column">
-                    <label for="num_disp">N° Disposición</label>
-                    <input type="text" id="num_disp" placeholder="Ej: 01-2026" required>
+    <form id="docForm">
+        <div class="grid">
+            <div>
+                <label for="num_disp">N° Disposición</label>
+                <input type="text" id="num_disp" placeholder="Ej: 01-2026" required>
 
-                    <label for="fecha_disp">Fecha de Disposición (Piura, ...)</label>
-                    <input type="text" id="fecha_disp" placeholder="Ej: 24 de febrero" required>
+                <label for="fecha_disp">Fecha de Disposición (Lugar y Fecha)</label>
+                <input type="text" id="fecha_disp" placeholder="Ej: Piura, 24 de febrero" required>
 
-                    <label for="nombre">Nombre del Imputado</label>
-                    <input type="text" id="nombre" placeholder="Nombre completo" required>
-                </div>
-                <div class="column">
-                    <label for="fecha_hechos">Fecha de los Hechos</label>
-                    <input type="text" id="fecha_hechos" placeholder="Ej: 20 de febrero de 2026" required>
+                <label for="nombre">Nombre del Imputado</label>
+                <input type="text" id="nombre" placeholder="Nombres y Apellidos" required>
 
-                    <label for="fecha_int">Fecha Intervención Policial (ACTA)</label>
-                    <input type="text" id="fecha_int" placeholder="Ej: 20 de febrero de 2026" required>
+                <label for="dni">Número de DNI</label>
+                <input type="text" id="dni" placeholder="Ej: 45678912" maxlength="8" required>
+            </div>
 
-                    <label for="num_dosaje">N° Certificado Dosaje</label>
-                    <input type="text" id="num_dosaje" placeholder="Ej: 0022-005432" required>
+            <div>
+                <label for="fecha_hechos">Fecha de los Hechos</label>
+                <input type="text" id="fecha_hechos" placeholder="Ej: 20 de febrero de 2026" required>
+
+                <label for="fecha_int">Fecha Intervención Policial</label>
+                <input type="text" id="fecha_int" placeholder="Ej: 20 de febrero de 2026" required>
+
+                <label for="num_dosaje">N° Certificado Dosaje</label>
+                <input type="text" id="num_dosaje" placeholder="Ej: 0022-005432" required>
+
+                <label for="res_dosaje">Resultado Dosaje (Número)</label>
+                <input type="number" step="0.01" id="res_dosaje" placeholder="Ej: 0.47" required>
+            </div>
+
+            <div class="full-width">
+                <label>Datos del Vehículo</label>
+                <div style="display: flex; gap: 15px;">
+                    <input type="text" id="vehiculo" placeholder="Tipo de Vehículo (ej. Camioneta)" required style="flex: 2;">
+                    <input type="text" id="placa" placeholder="N° de Placa" required style="flex: 1;">
                 </div>
             </div>
 
-            <div class="row">
-                <div class="column">
-                    <label for="res_dosaje">Resultado Dosaje (Numérico)</label>
-                    <input type="number" step="0.01" id="res_dosaje" placeholder="Ej: 0.47" required>
-                </div>
-                <div class="column">
-                    <label>Datos del Vehículo</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="vehiculo" placeholder="Vehículo" required>
-                        <input type="text" id="placa" placeholder="Placa" required>
-                    </div>
-                </div>
+            <div class="full-width">
+                <label for="hechos">Hechos Indagados</label>
+                <textarea id="hechos" rows="4" placeholder="Describa la intervención..." required></textarea>
             </div>
+        </div>
 
-            <label for="hechos">Hechos Indagados</label>
-            <textarea id="hechos" rows="4" placeholder="Describa brevemente la intervención..." required></textarea>
+        <button type="button" onclick="generarDocumento()">🚀 Generar Word y Descargar</button>
+        <button type="reset" class="reset-btn">Limpiar Formulario</button>
+    </form>
 
-            <div class="actions">
-                <button type="button" class="btn-primary" onclick="generarDocumento()"> Generar y Descargar Word</button>
-                <button type="reset" class="btn-secondary">Limpiar Formulario</button>
-            </div>
-        </form>
-    </main>
+    <script>
+        // Función para convertir el número de dosaje a texto legal
+        function convertirDosajeALetras(num) {
+            const valor = parseFloat(num);
+            if (isNaN(valor)) return "";
+            const partes = valor.toFixed(2).split('.');
+            const enteros = parseInt(partes[0]);
+            const decimales = parseInt(partes[1]);
+            const unidades = ["cero", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
+            
+            let textoEnteros = enteros === 0 ? "cero" : unidades[enteros] || enteros;
+            return `${textoEnteros} gramos con ${decimales} centigramos de alcohol por litro de sangre`;
+        }
 
-    <script src="script.js"></script>
+        async function generarDocumento() {
+            const resNum = document.getElementById('res_dosaje').value;
+
+            // Mapeo de variables para el MODELO_3.docx
+            const data = {
+                NUMERO_DISPOSICION: document.getElementById('num_disp').value,
+                FECHA_DISPOSICION: document.getElementById('fecha_disp').value,
+                NOMBRE_IMPUTADO: document.getElementById('nombre').value.toUpperCase(),
+                NUMERO_DNI: document.getElementById('dni').value, // <-- NUEVO CAMPO
+                HECHOS: document.getElementById('hechos').value,
+                FECHA_DE_HECHOS: document.getElementById('fecha_hechos').value,
+                FECHA_DE_INTERVENCION_POLICIAL: document.getElementById('fecha_int').value,
+                NUMER_DOSAJE: document.getElementById('num_dosaje').value,
+                RESULTADO_DOSAJE: resNum + " G/L",
+                RESULTADO_DOSAJE_LETRAS: convertirDosajeALetras(resNum),
+                VEHICULO: document.getElementById('vehiculo').value.toUpperCase(),
+                PLACA: document.getElementById('placa').value.toUpperCase()
+            };
+
+            // Validación de campos
+            if (Object.values(data).some(v => v === "" || v === " G/L")) {
+                alert("Por favor, complete todos los campos obligatorios.");
+                return;
+            }
+
+            try {
+                // Carga la plantilla Word
+                const response = await fetch('MODELO_3.docx');
+                if (!response.ok) throw new Error("No se encontró MODELO_3.docx en el servidor.");
+                
+                const content = await response.arrayBuffer();
+                const zip = new PizZip(content);
+                const doc = new window.docxtemplater(zip, {
+                    paragraphLoop: true,
+                    linebreaks: true,
+                });
+
+                // Reemplaza las etiquetas en el Word
+                doc.render(data);
+
+                // Crea el archivo y lo descarga
+                const out = doc.getZip().generate({
+                    type: "blob",
+                    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                });
+
+                saveAs(out, `Libertad_${data.NOMBRE_IMPUTADO.replace(/\s+/g, '_')}.docx`);
+            } catch (error) {
+                console.error(error);
+                alert("Error: Asegúrate de que el archivo 'MODELO_3.docx' esté en la carpeta raíz de tu GitHub.");
+            }
+        }
+    </script>
 </body>
 </html>
