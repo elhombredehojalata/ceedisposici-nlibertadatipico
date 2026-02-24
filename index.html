@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Disposiciones - Libertad</title>
+    <title>Generador de Disposiciones - Proyecto Omar</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.28.5/docxtemplater.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
@@ -54,12 +54,13 @@
         
         h1 { text-align: center; color: #0056b3; }
         hr { border: 0; border-top: 1px solid #ccc; margin: 20px 0; }
+        .info-fecha { font-size: 0.85em; color: #666; margin-top: -10px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <h1> Generador de Disposiciones CEE LIBERTAD - PROYECTO OMAR</h1>
-    <p style="text-align: center;">SOLO PARA FINES DE USO INTERNO Y DESAROLLO</p>
+    <h1>⚖️ Generador CEE LIBERTAD - PROYECTO OMAR</h1>
+    <p style="text-align: center;">USO INTERNO - FISCALÍA PIURA</p>
     <hr>
 
     <form id="docForm">
@@ -69,14 +70,20 @@
                 <input type="text" id="num_disp" value="01-2026" required>
                 
                 <label for="dni">DNI del Imputado</label>
-                <input type="text" id="dni" maxlength="8" placeholder="Ingrese 8 dígitos" required>
+                <input type="text" id="dni" maxlength="8" placeholder="8 dígitos" required>
                 
-                <label for="nombre">Nombre Completo</label>
-                <input type="text" id="nombre" placeholder="Ej: JUAN PÉREZ LÓPEZ" required>
+                <label for="nombre">Nombre Completo del Imputado</label>
+                <input type="text" id="nombre" placeholder="EJ: JUAN PÉREZ LÓPEZ" required>
+
+                <label for="fecha_hechos">Fecha de los Hechos</label>
+                <input type="text" id="fecha_hechos" placeholder="Ej: 23 de febrero de 2026" required>
+                <p class="info-fecha">Día en que ocurrió la intervención.</p>
             </div>
+            
             <div>
-                <label for="fecha_disp">Lugar y Fecha Hoy</label>
-                <input type="text" id="fecha_disp" value="Piura, 24 de febrero de 2026" required>
+                <label for="fecha_disp">Fecha de Disposición (Hoy)</label>
+                <input type="text" id="fecha_disp" required>
+                <p class="info-fecha">Lugar y fecha del documento.</p>
                 
                 <label for="vehiculo">Vehículo</label>
                 <input type="text" id="vehiculo" placeholder="Ej: Motocicleta Honda" required>
@@ -86,7 +93,7 @@
             </div>
         </div>
 
-        <label for="hechos">Hechos Indagados</label>
+        <label for="hechos">Hechos Indagados (Resumen)</label>
         <textarea id="hechos" rows="4" placeholder="Describa brevemente la intervención..." required></textarea>
 
         <div class="grid">
@@ -108,28 +115,34 @@
     </form>
 
     <script>
-        // Función para convertir el dosaje numérico a texto legal
+        // Lógica para poner la fecha de hoy automáticamente al cargar
+        window.onload = function() {
+            const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+            const f = new Date();
+            const fechaHoy = `Piura, ${f.getDate()} de ${meses[f.getMonth()]} de ${f.getFullYear()}`;
+            document.getElementById('fecha_disp').value = fechaHoy;
+        };
+
         function convertirDosajeALetras(num) {
             const valor = parseFloat(num);
             if (isNaN(valor)) return "";
             const partes = valor.toFixed(2).split('.');
             const unidades = ["cero", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
-            
             let textoEnteros = unidades[parseInt(partes[0])] || partes[0];
             return `${textoEnteros} gramos con ${partes[1]} centigramos de alcohol por litro de sangre`;
         }
 
         async function generarDocumento() {
-            // 1. Verificar qué modelo usar
             const conFirma = document.getElementById('check_firma').checked;
             const archivoModelo = conFirma ? 'MODELO_3_FIRMADO.docx' : 'MODELO_3.docx';
 
-            // 2. Capturar datos del formulario
+            // CAPTURA DE DATOS ACTUALIZADA
             const data = {
                 NUMERO_DISPOSICION: document.getElementById('num_disp').value,
                 FECHA_DISPOSICION: document.getElementById('fecha_disp').value,
                 NOMBRE_IMPUTADO: document.getElementById('nombre').value.toUpperCase(),
                 NUMERO_DNI: document.getElementById('dni').value,
+                FECHA_DE_HECHOS: document.getElementById('fecha_hechos').value, // NUEVO CAMPO
                 HECHOS: document.getElementById('hechos').value,
                 NUMER_DOSAJE: document.getElementById('num_dosaje').value,
                 RESULTADO_DOSAJE: document.getElementById('res_dosaje').value + " G/L",
@@ -138,14 +151,12 @@
                 PLACA: document.getElementById('placa').value.toUpperCase()
             };
 
-            // Validación simple
-            if (!data.NUMERO_DNI || !data.NOMBRE_IMPUTADO) {
-                alert("Por favor, complete los datos principales.");
+            if (!data.NUMERO_DNI || !data.NOMBRE_IMPUTADO || !data.FECHA_DE_HECHOS) {
+                alert("Por favor, complete todos los datos, incluyendo la fecha de los hechos.");
                 return;
             }
 
             try {
-                // 3. Cargar el archivo .docx desde GitHub
                 const response = await fetch(archivoModelo);
                 if (!response.ok) throw new Error("No se encontró el archivo: " + archivoModelo);
                 
@@ -156,22 +167,19 @@
                     linebreaks: true,
                 });
 
-                // 4. Renderizar (reemplazar etiquetas)
                 doc.render(data);
 
-                // 5. Generar el Blob para descarga
                 const out = doc.getZip().generate({
                     type: "blob",
                     mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 });
 
-                // 6. Guardar archivo
                 const nombreArchivo = `Disposicion_${data.NUMERO_DNI}.docx`;
                 saveAs(out, nombreArchivo);
 
             } catch (error) {
                 console.error(error);
-                alert("Error crítico: Asegúrate de que los archivos 'MODELO_3.docx' y 'MODELO_3_FIRMADO.docx' estén subidos en tu repositorio.");
+                alert("Error crítico: Verifica tus archivos en el servidor.");
             }
         }
     </script>
