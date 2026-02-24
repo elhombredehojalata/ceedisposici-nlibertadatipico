@@ -1,0 +1,42 @@
+body {
+    padding: 2rem;
+    background-color: #f4f7f6;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.row {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.column {
+    flex: 1;
+    min-width: 300px;
+}
+
+.actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-primary {
+    background-color: #0056b3 !important;
+    border: none;
+    flex: 2;
+}
+
+.btn-secondary {
+    background-color: #6c757d !important;
+    border: none;
+    flex: 1;
+}
+
+input:focus, textarea:focus {
+    border-color: #0056b3 !important;
+}
