@@ -3,70 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Disposición de libertad CEE ATÍPICO</title>
+    <title>Fiscalía - Generador Rápido</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.28.5/docxtemplater.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        .container { max-width: 800px; margin: auto; }
+        .preview-box { 
+            background: #f9f9f9; 
+            border: 1px solid #ccc; 
+            padding: 20px; 
+            margin-top: 20px; 
+            white-space: pre-wrap; 
+            color: #333;
+            font-family: 'Arial', sans-serif;
+        }
+        .btn-copy { background-color: #28a745; color: white; }
+    </style>
 </head>
 <body>
-    <header>
-        <h1> Generador de Disposición de Libertad</h1>
-        <p>Complete los campos para generar el documento basado en el <strong>Modelo 3</strong>.</p>
-    </header>
+    <div class="container">
+        <h1>⚖️ Generador de Disposición</h1>
+        <p>Llena los datos y elige: Descargar Word o Copiar Texto.</p>
+        <hr>
 
-    <main>
-        <form id="docForm">
-            <div class="row">
-                <div class="column">
-                    <label for="num_disp">N° Disposición</label>
-                    <input type="text" id="num_disp" placeholder="Ej: 01-2026" required>
+        <form id="mainForm">
+            <label>N° Disposición: <input type="text" id="num_disp" value="01-2026"></label>
+            <label>Nombre Imputado: <input type="text" id="nombre" placeholder="JUAN PEREZ"></label>
+            <label>Fecha Hoy: <input type="text" id="fecha_disp" value="24 de febrero"></label>
+            <label>Dosaje (Número): <input type="number" step="0.01" id="res_dosaje" value="0.47"></label>
+            <label>Vehículo: <input type="text" id="vehiculo" placeholder="MOTO HONDA"></label>
+            <label>Placa: <input type="text" id="placa" placeholder="1234-AB"></label>
+            <label>Hechos: <textarea id="hechos" rows="3">Siendo las ... fue intervenido ...</textarea></label>
 
-                    <label for="fecha_disp">Fecha de Disposición (Piura, ...)</label>
-                    <input type="text" id="fecha_disp" placeholder="Ej: 24 de febrero" required>
-
-                    <label for="nombre">Nombre del Imputado</label>
-                    <input type="text" id="nombre" placeholder="Nombre completo" required>
-                </div>
-                <div class="column">
-                    <label for="fecha_hechos">Fecha de los Hechos</label>
-                    <input type="text" id="fecha_hechos" placeholder="Ej: 20 de febrero de 2026" required>
-
-                    <label for="fecha_int">Fecha Intervención Policial</label>
-                    <input type="text" id="fecha_int" placeholder="Ej: 20 de febrero de 2026" required>
-
-                    <label for="num_dosaje">N° Certificado Dosaje</label>
-                    <input type="text" id="num_dosaje" placeholder="Ej: 0022-005432" required>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="column">
-                    <label for="res_dosaje">Resultado Dosaje (Numérico)</label>
-                    <input type="number" step="0.01" id="res_dosaje" placeholder="Ej: 0.47" required>
-                </div>
-                <div class="column">
-                    <label>Datos del Vehículo</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="vehiculo" placeholder="Vehículo" required>
-                        <input type="text" id="placa" placeholder="Placa" required>
-                    </div>
-                </div>
-            </div>
-
-            <label for="hechos">Hechos Indagados</label>
-            <textarea id="hechos" rows="4" placeholder="Describa brevemente la intervención..." required></textarea>
-
-            <div class="actions">
-                <button type="button" class="btn-primary" onclick="generarDocumento()">Generar y Descargar Word</button>
-                <button type="reset" class="btn-secondary">Limpiar Formulario</button>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="descargarWord()">⬇️ Descargar Word</button>
+                <button type="button" class="btn-copy" onclick="generarVistaPrevia()">📝 Ver Texto para Copiar</button>
             </div>
         </form>
-    </main>
 
-    <script src="script.js"></script>
+        <div id="resultado" style="display:none;">
+            <h3>Vista Previa (Copiar y Pegar):</h3>
+            <button onclick="copiarAlPortapapeles()">📋 Copiar todo el texto</button>
+            <div id="textoPreview" class="preview-box"></div>
+        </div>
+    </div>
+
+    <script>
+        function convertirDosaje(num) {
+            let partes = parseFloat(num).toFixed(2).split('.');
+            let unidades = ["cero", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
+            let textoEnteros = unidades[parseInt(partes[0])] || partes[0];
+            return textoEnteros + " gramos con " + partes[1] + " centigramos de alcohol por litro de sangre";
+        }
+
+        function obtenerDatos() {
+            return {
+                NUMERO_DISPOSICION: document.getElementById('num_disp').value,
+                FECHA_DISPOSICION: document.getElementById('fecha_disp').value,
+                NOMBRE_IMPUTADO: document.getElementById('nombre').value.toUpperCase(),
+                HECHOS: document.getElementById('hechos').value,
+                RESULTADO_DOSAJE: document.getElementById('res_dosaje').value + " G/L",
+                RESULTADO_DOSAJE_LETRAS: convertirDosaje(document.getElementById('res_dosaje').value),
+                VEHICULO: document.getElementById('vehiculo').value.toUpperCase(),
+                PLACA: document.getElementById('placa').value.toUpperCase()
+            };
+        }
+
+        // OPCIÓN 1: GENERAR WORD
+        async function descargarWord() {
+            const data = obtenerDatos();
+            try {
+                const response = await fetch('MODELO_3.docx');
+                if (!response.ok) throw new Error("No se halló MODELO_3.docx");
+                const content = await response.arrayBuffer();
+                const zip = new PizZip(content);
+                const doc = new window.docxtemplater(zip, {paragraphLoop: true, linebreaks: true});
+                doc.render(data);
+                const out = doc.getZip().generate({type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+                saveAs(out, "Libertad_" + data.NOMBRE_IMPUTADO + ".docx");
+            } catch (e) {
+                alert("Error con el Word. Usa la opción de 'Ver Texto'.");
+            }
+        }
+
+        // OPCIÓN 2: VISTA PREVIA DE TEXTO
+        function generarVistaPrevia() {
+            const d = obtenerDatos();
+            const texto = `DISPOSICIÓN Nº ${d.NUMERO_DISPOSICION}
+Piura, ${d.FECHA_DISPOSICION} del año dos mil veintiséis.-
+
+I.- VISTO: Los actuados para resolver la situación de ${d.NOMBRE_IMPUTADO}...
+
+II.- HECHO INDAGADO: ${d.HECHOS}
+
+CONSIDERANDO: Que el resultado de dosaje etílico es de ${d.RESULTADO_DOSAJE} (${d.RESULTADO_DOSAJE_LETRAS})... 
+Por lo tanto, al conducir el vehículo ${d.VEHICULO} con placa ${d.PLACA}, la conducta es atípica.
+
+SE DISPONE: LA LIBERTAD de ${d.NOMBRE_IMPUTADO}.`;
+
+            document.getElementById('textoPreview').innerText = texto;
+            document.getElementById('resultado').style.display = 'block';
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function copiarAlPortapapeles() {
+            const texto = document.getElementById('textoPreview').innerText;
+            navigator.clipboard.writeText(texto).then(() => alert("¡Texto copiado!"));
+        }
+    </script>
 </body>
 </html>
