@@ -1,55 +1,30 @@
-/**
- * Convierte el número de dosaje (ej. 0.47) a formato legal escrito.
- */
-function convertirDosajeALetras(num) {
-    const valor = parseFloat(num);
-    if (isNaN(valor)) return "";
-    const partes = valor.toFixed(2).split('.');
-    const enteros = parseInt(partes[0]);
-    const decimales = parseInt(partes[1]);
-    const unidades = ["cero", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
-    
-    let textoEnteros = enteros === 0 ? "cero" : unidades[enteros] || enteros;
-    return `${textoEnteros} gramos con ${decimales} centigramos de alcohol por litro de sangre`;
-}
-
-/**
- * Función principal para generar el documento Word.
- */
 async function generarDocumento() {
-    // 1. Extraemos los valores de los inputs del HTML
-    const resNum = document.getElementById('res_dosaje').value;
-    const dniValor = document.getElementById('dni').value; // <--- CAPTURA EL DNI
+    // 1. Verificar si quiere firma o no
+    const incluirFirma = document.getElementById('check_firma').checked;
+    
+    // 2. Elegir el archivo según la elección del usuario
+    const archivoElegido = incluirFirma ? 'MODELO_3_FIRMADO.docx' : 'MODELO_3.docx';
 
-    // 2. Creamos el objeto 'data' que mapea las llaves { } del Word
+    // 3. Recopilar los datos del formulario
     const data = {
         NUMERO_DISPOSICION: document.getElementById('num_disp').value,
         FECHA_DISPOSICION: document.getElementById('fecha_disp').value,
         NOMBRE_IMPUTADO: document.getElementById('nombre').value.toUpperCase(),
-        
-        // ESTA ES LA VARIABLE CLAVE PARA TU NUEVO MODELO
-        NUMERO_DNI: dniValor, 
-
+        NUMERO_DNI: document.getElementById('dni').value,
         HECHOS: document.getElementById('hechos').value,
         FECHA_DE_HECHOS: document.getElementById('fecha_hechos').value,
         FECHA_DE_INTERVENCION_POLICIAL: document.getElementById('fecha_int').value,
         NUMER_DOSAJE: document.getElementById('num_dosaje').value,
-        RESULTADO_DOSAJE: resNum + " G/L",
-        RESULTADO_DOSAJE_LETRAS: convertirDosajeALetras(resNum),
+        RESULTADO_DOSAJE: document.getElementById('res_dosaje').value + " G/L",
+        RESULTADO_DOSAJE_LETRAS: convertirDosajeALetras(document.getElementById('res_dosaje').value),
         VEHICULO: document.getElementById('vehiculo').value.toUpperCase(),
         PLACA: document.getElementById('placa').value.toUpperCase()
     };
 
-    // 3. Verificación de seguridad
-    if (Object.values(data).some(v => v === "" || v === " G/L")) {
-        alert("Por favor, completa todos los campos, incluyendo el DNI.");
-        return;
-    }
-
     try {
-        // 4. Cargamos el archivo desde la raíz de tu GitHub
-        const response = await fetch('MODELO_3.docx');
-        if (!response.ok) throw new Error("No se encontró MODELO_3.docx");
+        // 4. Cargar el archivo correspondiente
+        const response = await fetch(archivoElegido);
+        if (!response.ok) throw new Error("No se encontró el archivo: " + archivoElegido);
         
         const content = await response.arrayBuffer();
         const zip = new PizZip(content);
@@ -58,20 +33,71 @@ async function generarDocumento() {
             linebreaks: true,
         });
 
-        // 5. El motor reemplaza {NUMERO_DNI} por el valor de 'dniValor'
+        // 5. Llenar los datos
         doc.render(data);
 
-        // 6. Creamos el archivo final
+        // 6. Descargar
         const out = doc.getZip().generate({
             type: "blob",
             mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         });
 
-        // 7. Descargamos el archivo
-        saveAs(out, `Libertad_DNI_${data.NUMERO_DNI}.docx`);
+        const prefijo = incluirFirma ? "FIRMADO_" : "";
+        saveAs(out, `${prefijo}Libertad_${data.NUMERO_DNI}.docx`);
 
     } catch (error) {
         console.error(error);
-        alert("Error: Revisa que el archivo MODELO_3.docx esté en tu repositorio.");
+        alert("Error: Asegúrate de que ambos archivos .docx estén en tu GitHub.");
+    }
+}async function generarDocumento() {
+    // 1. Verificar si quiere firma o no
+    const incluirFirma = document.getElementById('check_firma').checked;
+    
+    // 2. Elegir el archivo según la elección del usuario
+    const archivoElegido = incluirFirma ? 'MODELO_3_FIRMADO.docx' : 'MODELO_3.docx';
+
+    // 3. Recopilar los datos del formulario
+    const data = {
+        NUMERO_DISPOSICION: document.getElementById('num_disp').value,
+        FECHA_DISPOSICION: document.getElementById('fecha_disp').value,
+        NOMBRE_IMPUTADO: document.getElementById('nombre').value.toUpperCase(),
+        NUMERO_DNI: document.getElementById('dni').value,
+        HECHOS: document.getElementById('hechos').value,
+        FECHA_DE_HECHOS: document.getElementById('fecha_hechos').value,
+        FECHA_DE_INTERVENCION_POLICIAL: document.getElementById('fecha_int').value,
+        NUMER_DOSAJE: document.getElementById('num_dosaje').value,
+        RESULTADO_DOSAJE: document.getElementById('res_dosaje').value + " G/L",
+        RESULTADO_DOSAJE_LETRAS: convertirDosajeALetras(document.getElementById('res_dosaje').value),
+        VEHICULO: document.getElementById('vehiculo').value.toUpperCase(),
+        PLACA: document.getElementById('placa').value.toUpperCase()
+    };
+
+    try {
+        // 4. Cargar el archivo correspondiente
+        const response = await fetch(archivoElegido);
+        if (!response.ok) throw new Error("No se encontró el archivo: " + archivoElegido);
+        
+        const content = await response.arrayBuffer();
+        const zip = new PizZip(content);
+        const doc = new window.docxtemplater(zip, {
+            paragraphLoop: true,
+            linebreaks: true,
+        });
+
+        // 5. Llenar los datos
+        doc.render(data);
+
+        // 6. Descargar
+        const out = doc.getZip().generate({
+            type: "blob",
+            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        });
+
+        const prefijo = incluirFirma ? "FIRMADO_" : "";
+        saveAs(out, `${prefijo}Libertad_${data.NUMERO_DNI}.docx`);
+
+    } catch (error) {
+        console.error(error);
+        alert("Error: Asegúrate de que ambos archivos .docx estén en tu GitHub.");
     }
 }
