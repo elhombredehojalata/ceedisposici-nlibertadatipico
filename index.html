@@ -3,124 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Disposiciones - Proyecto Omar</title>
-    
+    <title>Generador Fiscal - Proyecto Omar</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.28.5/docxtemplater.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
     
     <style>
         body { max-width: 800px; margin: auto; padding: 20px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .full-width { grid-column: 1 / -1; }
-        
-        .caja-firma {
-            background-color: #f0f4f8;
-            border: 1px solid #d1d9e0;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-
-        .check-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        input[type="checkbox"] {
-            width: 22px;
-            height: 22px;
-            margin: 0;
-            cursor: pointer;
-        }
-
-        button {
-            width: 100%;
-            background-color: #0056b3;
-            color: white;
+        .caja-opcional {
+            background-color: #f9f9f9;
             padding: 15px;
-            font-size: 1.1em;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            border-radius: 8px;
+            border: 1px dashed #ccc;
+            margin: 15px 0;
+            display: none; /* Oculto por defecto */
         }
-
-        button:hover { background-color: #004494; }
-        
-        h1 { text-align: center; color: #0056b3; }
-        hr { border: 0; border-top: 1px solid #ccc; margin: 20px 0; }
-        .info-fecha { font-size: 0.85em; color: #666; margin-top: -10px; margin-bottom: 10px; }
+        .visible { display: block !important; }
+        .caja-firma { background-color: #f0f4f8; padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .check-group { display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: bold; }
+        input[type="checkbox"] { width: 20px; height: 20px; margin: 0; }
     </style>
 </head>
 <body>
 
-    <h1>⚖️ Generador CEE LIBERTAD - PROYECTO OMAR</h1>
-    <p style="text-align: center;">USO INTERNO - FISCALÍA PIURA</p>
+    <h1>⚖️ CEE LIBERTAD - PROYECTO OMAR</h1>
     <hr>
 
     <form id="docForm">
         <div class="grid">
             <div>
-                <label for="num_disp">N° Disposición</label>
-                <input type="text" id="num_disp" value="01-2026" required>
+                <label>N° Disposición</label>
+                <input type="text" id="num_disp" value="01-2026">
                 
-                <label for="dni">DNI del Imputado</label>
-                <input type="text" id="dni" maxlength="8" placeholder="8 dígitos" required>
+                <label>DNI Imputado</label>
+                <input type="text" id="dni" maxlength="8">
                 
-                <label for="nombre">Nombre Completo del Imputado</label>
-                <input type="text" id="nombre" placeholder="EJ: JUAN PÉREZ LÓPEZ" required>
-
-                <label for="fecha_hechos">Fecha de los Hechos</label>
-                <input type="text" id="fecha_hechos" placeholder="Ej: 23 de febrero de 2026" required>
-                <p class="info-fecha">Día en que ocurrió la intervención.</p>
+                <label>Nombre Completo</label>
+                <input type="text" id="nombre">
             </div>
-            
             <div>
-                <label for="fecha_disp">Fecha de Disposición (Hoy)</label>
-                <input type="text" id="fecha_disp" required>
-                <p class="info-fecha">Lugar y fecha del documento.</p>
+                <label>Fecha de Hoy</label>
+                <input type="text" id="fecha_disp">
                 
-                <label for="vehiculo">Vehículo</label>
-                <input type="text" id="vehiculo" placeholder="Ej: Motocicleta Honda" required>
-                
-                <label for="placa">N° Placa</label>
-                <input type="text" id="placa" placeholder="Ej: 1234-5B" required>
+                <label>Fecha de los Hechos</label>
+                <input type="text" id="fecha_hechos" placeholder="Ej: 23 de febrero de 2026">
             </div>
-        </div>
-
-        <label for="hechos">Hechos Indagados (Resumen)</label>
-        <textarea id="hechos" rows="4" placeholder="Describa brevemente la intervención..." required></textarea>
-
-        <div class="grid">
-            <label for="num_dosaje">N° Certificado Dosaje</label>
-            <input type="text" id="num_dosaje" placeholder="Ej: 0022-00123" required>
-            
-            <label for="res_dosaje">Resultado Dosaje (Número)</label>
-            <input type="number" step="0.01" id="res_dosaje" value="0.47" required>
         </div>
 
         <div class="caja-firma">
-            <label class="check-container">
-                <input type="checkbox" id="check_firma">
-                <span style="font-weight: bold; font-size: 1.1em;">¿Desea consignar firma en el documento?</span>
+            <label class="check-group">
+                <input type="checkbox" id="check_vehiculo" onchange="toggleVehiculo()">
+                ¿HABRÁ DEVOLUCIÓN DE VEHÍCULO?
             </label>
         </div>
 
-        <button type="button" onclick="generarDocumento()">🚀 Descargar Disposición (.docx)</button>
+        <div id="seccion_vehiculo_campos" class="caja-opcional">
+            <div class="grid">
+                <label>Vehículo (Marca/Modelo) <input type="text" id="vehiculo" placeholder="Ej: Camioneta Toyota"></label>
+                <label>N° Placa <input type="text" id="placa" placeholder="Ej: P1A-999"></label>
+            </div>
+        </div>
+
+        <label>Hechos Indagados</label>
+        <textarea id="hechos" rows="3"></textarea>
+
+        <div class="grid">
+            <label>N° Certificado Dosaje <input type="text" id="num_dosaje"></label>
+            <label>Resultado (Número) <input type="number" step="0.01" id="res_dosaje" value="0.47"></label>
+        </div>
+
+        <div class="caja-firma">
+            <label class="check-group">
+                <input type="checkbox" id="check_firma">
+                ¿CONSIGNAR FIRMA EN EL DOCUMENTO?
+            </label>
+        </div>
+
+        <button type="button" onclick="generarDocumento()">🚀 DESCARGAR DISPOSICIÓN</button>
     </form>
 
     <script>
-        // Lógica para poner la fecha de hoy automáticamente al cargar
+        // Función para mostrar/ocultar campos de vehículo
+        function toggleVehiculo() {
+            const seccion = document.getElementById('seccion_vehiculo_campos');
+            seccion.classList.toggle('visible', document.getElementById('check_vehiculo').checked);
+        }
+
         window.onload = function() {
             const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
             const f = new Date();
-            const fechaHoy = `Piura, ${f.getDate()} de ${meses[f.getMonth()]} de ${f.getFullYear()}`;
-            document.getElementById('fecha_disp').value = fechaHoy;
+            document.getElementById('fecha_disp').value = `Piura, ${f.getDate()} de ${meses[f.getMonth()]} de ${f.getFullYear()}`;
         };
 
         function convertirDosajeALetras(num) {
@@ -128,44 +102,36 @@
             if (isNaN(valor)) return "";
             const partes = valor.toFixed(2).split('.');
             const unidades = ["cero", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
-            let textoEnteros = unidades[parseInt(partes[0])] || partes[0];
-            return `${textoEnteros} gramos con ${partes[1]} centigramos de alcohol por litro de sangre`;
+            return `${unidades[parseInt(partes[0])] || partes[0]} gramos con ${partes[1]} centigramos de alcohol por litro de sangre`;
         }
 
         async function generarDocumento() {
             const conFirma = document.getElementById('check_firma').checked;
+            const conVehiculo = document.getElementById('check_vehiculo').checked;
             const archivoModelo = conFirma ? 'MODELO_3_FIRMADO.docx' : 'MODELO_3.docx';
 
-            // CAPTURA DE DATOS ACTUALIZADA
             const data = {
                 NUMERO_DISPOSICION: document.getElementById('num_disp').value,
                 FECHA_DISPOSICION: document.getElementById('fecha_disp').value,
                 NOMBRE_IMPUTADO: document.getElementById('nombre').value.toUpperCase(),
                 NUMERO_DNI: document.getElementById('dni').value,
-                FECHA_DE_HECHOS: document.getElementById('fecha_hechos').value, // NUEVO CAMPO
+                FECHA_DE_HECHOS: document.getElementById('fecha_hechos').value,
                 HECHOS: document.getElementById('hechos').value,
                 NUMER_DOSAJE: document.getElementById('num_dosaje').value,
                 RESULTADO_DOSAJE: document.getElementById('res_dosaje').value + " G/L",
                 RESULTADO_DOSAJE_LETRAS: convertirDosajeALetras(document.getElementById('res_dosaje').value),
+                
+                // Lógica condicional para el Word
+                mostrar_vehiculo: conVehiculo, 
                 VEHICULO: document.getElementById('vehiculo').value.toUpperCase(),
                 PLACA: document.getElementById('placa').value.toUpperCase()
             };
 
-            if (!data.NUMERO_DNI || !data.NOMBRE_IMPUTADO || !data.FECHA_DE_HECHOS) {
-                alert("Por favor, complete todos los datos, incluyendo la fecha de los hechos.");
-                return;
-            }
-
             try {
                 const response = await fetch(archivoModelo);
-                if (!response.ok) throw new Error("No se encontró el archivo: " + archivoModelo);
-                
                 const content = await response.arrayBuffer();
                 const zip = new PizZip(content);
-                const doc = new window.docxtemplater(zip, {
-                    paragraphLoop: true,
-                    linebreaks: true,
-                });
+                const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
 
                 doc.render(data);
 
@@ -174,12 +140,9 @@
                     mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 });
 
-                const nombreArchivo = `Disposicion_${data.NUMERO_DNI}.docx`;
-                saveAs(out, nombreArchivo);
-
+                saveAs(out, `Disposicion_${data.NUMERO_DNI}.docx`);
             } catch (error) {
-                console.error(error);
-                alert("Error crítico: Verifica tus archivos en el servidor.");
+                alert("Error al cargar los modelos .docx");
             }
         }
     </script>
