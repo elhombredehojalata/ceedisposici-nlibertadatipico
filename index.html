@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fiscalía Digital - Generador de Libertad CEE - PROYECTO OMAR</title>
+    <title>Generador de Disposiciones - Libertad</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.28.5/docxtemplater.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
@@ -12,114 +12,142 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
     
     <style>
-        body { max-width: 900px; margin: auto; padding: 20px; background-color: #f4f7f6; }
-        header { text-align: center; margin-bottom: 30px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        body { max-width: 800px; margin: auto; padding: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .full-width { grid-column: 1 / -1; }
-        button { width: 100%; padding: 15px; background-color: #0056b3; color: white; border: none; cursor: pointer; font-size: 1.1em; }
+        
+        .caja-firma {
+            background-color: #f0f4f8;
+            border: 1px solid #d1d9e0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .check-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        button {
+            width: 100%;
+            background-color: #0056b3;
+            color: white;
+            padding: 15px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
         button:hover { background-color: #004494; }
-        .reset-btn { background-color: #6c757d; margin-top: 10px; }
-        label { font-weight: bold; margin-top: 10px; display: block; }
+        
+        h1 { text-align: center; color: #0056b3; }
+        hr { border: 0; border-top: 1px solid #ccc; margin: 20px 0; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Generador de Disposición de Libertad- Proyecto Omar</h1>
-        <p>SOLO PARA FINES DE PRUEBA Y DESARROLLO</p>
-    </header>
+    <h1>⚖️ Generador de Disposiciones</h1>
+    <p style="text-align: center;">Fiscalía Provincial Corporativa de Piura</p>
+    <hr>
 
     <form id="docForm">
         <div class="grid">
             <div>
                 <label for="num_disp">N° Disposición</label>
-                <input type="text" id="num_disp" placeholder="Ej: 01-2026" required>
-
-                <label for="fecha_disp">Fecha de Disposición (Lugar y Fecha)</label>
-                <input type="text" id="fecha_disp" placeholder="Ej: Piura, 24 de febrero" required>
-
-                <label for="nombre">Nombre del Imputado</label>
-                <input type="text" id="nombre" placeholder="Nombres y Apellidos" required>
-
-                <label for="dni">Número de DNI</label>
-                <input type="text" id="dni" placeholder="Ej: 45678912" maxlength="8" required>
+                <input type="text" id="num_disp" value="01-2026" required>
+                
+                <label for="dni">DNI del Imputado</label>
+                <input type="text" id="dni" maxlength="8" placeholder="Ingrese 8 dígitos" required>
+                
+                <label for="nombre">Nombre Completo</label>
+                <input type="text" id="nombre" placeholder="Ej: JUAN PÉREZ LÓPEZ" required>
             </div>
-
             <div>
-                <label for="fecha_hechos">Fecha de los Hechos</label>
-                <input type="text" id="fecha_hechos" placeholder="Ej: 20 de febrero de 2026" required>
-
-                <label for="fecha_int">Fecha Intervención Policial</label>
-                <input type="text" id="fecha_int" placeholder="Ej: 20 de febrero de 2026" required>
-
-                <label for="num_dosaje">N° Certificado Dosaje</label>
-                <input type="text" id="num_dosaje" placeholder="Ej: 0022-005432" required>
-
-                <label for="res_dosaje">Resultado Dosaje (Número)</label>
-                <input type="number" step="0.01" id="res_dosaje" placeholder="Ej: 0.47" required>
-            </div>
-
-            <div class="full-width">
-                <label>Datos del Vehículo</label>
-                <div style="display: flex; gap: 15px;">
-                    <input type="text" id="vehiculo" placeholder="Tipo de Vehículo (ej. Camioneta)" required style="flex: 2;">
-                    <input type="text" id="placa" placeholder="N° de Placa" required style="flex: 1;">
-                </div>
-            </div>
-
-            <div class="full-width">
-                <label for="hechos">Hechos Indagados</label>
-                <textarea id="hechos" rows="4" placeholder="Describa la intervención..." required></textarea>
+                <label for="fecha_disp">Lugar y Fecha Hoy</label>
+                <input type="text" id="fecha_disp" value="Piura, 24 de febrero de 2026" required>
+                
+                <label for="vehiculo">Vehículo</label>
+                <input type="text" id="vehiculo" placeholder="Ej: Motocicleta Honda" required>
+                
+                <label for="placa">N° Placa</label>
+                <input type="text" id="placa" placeholder="Ej: 1234-5B" required>
             </div>
         </div>
 
-        <button type="button" onclick="generarDocumento()">🚀 Generar Word y Descargar</button>
-        <button type="reset" class="reset-btn">Limpiar Formulario</button>
+        <label for="hechos">Hechos Indagados</label>
+        <textarea id="hechos" rows="4" placeholder="Describa brevemente la intervención..." required></textarea>
+
+        <div class="grid">
+            <label for="num_dosaje">N° Certificado Dosaje</label>
+            <input type="text" id="num_dosaje" placeholder="Ej: 0022-00123" required>
+            
+            <label for="res_dosaje">Resultado Dosaje (Número)</label>
+            <input type="number" step="0.01" id="res_dosaje" value="0.47" required>
+        </div>
+
+        <div class="caja-firma">
+            <label class="check-container">
+                <input type="checkbox" id="check_firma">
+                <span style="font-weight: bold; font-size: 1.1em;">¿Desea consignar firma en el documento?</span>
+            </label>
+        </div>
+
+        <button type="button" onclick="generarDocumento()">🚀 Descargar Disposición (.docx)</button>
     </form>
 
     <script>
-        // Función para convertir el número de dosaje a texto legal
+        // Función para convertir el dosaje numérico a texto legal
         function convertirDosajeALetras(num) {
             const valor = parseFloat(num);
             if (isNaN(valor)) return "";
             const partes = valor.toFixed(2).split('.');
-            const enteros = parseInt(partes[0]);
-            const decimales = parseInt(partes[1]);
             const unidades = ["cero", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
             
-            let textoEnteros = enteros === 0 ? "cero" : unidades[enteros] || enteros;
-            return `${textoEnteros} gramos con ${decimales} centigramos de alcohol por litro de sangre`;
+            let textoEnteros = unidades[parseInt(partes[0])] || partes[0];
+            return `${textoEnteros} gramos con ${partes[1]} centigramos de alcohol por litro de sangre`;
         }
 
         async function generarDocumento() {
-            const resNum = document.getElementById('res_dosaje').value;
+            // 1. Verificar qué modelo usar
+            const conFirma = document.getElementById('check_firma').checked;
+            const archivoModelo = conFirma ? 'MODELO_3_FIRMADO.docx' : 'MODELO_3.docx';
 
-            // Mapeo de variables para el MODELO_3.docx
+            // 2. Capturar datos del formulario
             const data = {
                 NUMERO_DISPOSICION: document.getElementById('num_disp').value,
                 FECHA_DISPOSICION: document.getElementById('fecha_disp').value,
                 NOMBRE_IMPUTADO: document.getElementById('nombre').value.toUpperCase(),
-                NUMERO_DNI: document.getElementById('dni').value, // <-- NUEVO CAMPO
+                NUMERO_DNI: document.getElementById('dni').value,
                 HECHOS: document.getElementById('hechos').value,
-                FECHA_DE_HECHOS: document.getElementById('fecha_hechos').value,
-                FECHA_DE_INTERVENCION_POLICIAL: document.getElementById('fecha_int').value,
                 NUMER_DOSAJE: document.getElementById('num_dosaje').value,
-                RESULTADO_DOSAJE: resNum + " G/L",
-                RESULTADO_DOSAJE_LETRAS: convertirDosajeALetras(resNum),
+                RESULTADO_DOSAJE: document.getElementById('res_dosaje').value + " G/L",
+                RESULTADO_DOSAJE_LETRAS: convertirDosajeALetras(document.getElementById('res_dosaje').value),
                 VEHICULO: document.getElementById('vehiculo').value.toUpperCase(),
                 PLACA: document.getElementById('placa').value.toUpperCase()
             };
 
-            // Validación de campos
-            if (Object.values(data).some(v => v === "" || v === " G/L")) {
-                alert("Por favor, complete todos los campos obligatorios.");
+            // Validación simple
+            if (!data.NUMERO_DNI || !data.NOMBRE_IMPUTADO) {
+                alert("Por favor, complete los datos principales.");
                 return;
             }
 
             try {
-                // Carga la plantilla Word
-                const response = await fetch('MODELO_3.docx');
-                if (!response.ok) throw new Error("No se encontró MODELO_3.docx en el servidor.");
+                // 3. Cargar el archivo .docx desde GitHub
+                const response = await fetch(archivoModelo);
+                if (!response.ok) throw new Error("No se encontró el archivo: " + archivoModelo);
                 
                 const content = await response.arrayBuffer();
                 const zip = new PizZip(content);
@@ -128,19 +156,22 @@
                     linebreaks: true,
                 });
 
-                // Reemplaza las etiquetas en el Word
+                // 4. Renderizar (reemplazar etiquetas)
                 doc.render(data);
 
-                // Crea el archivo y lo descarga
+                // 5. Generar el Blob para descarga
                 const out = doc.getZip().generate({
                     type: "blob",
                     mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 });
 
-                saveAs(out, `Libertad_${data.NOMBRE_IMPUTADO.replace(/\s+/g, '_')}.docx`);
+                // 6. Guardar archivo
+                const nombreArchivo = `Disposicion_${data.NUMERO_DNI}.docx`;
+                saveAs(out, nombreArchivo);
+
             } catch (error) {
                 console.error(error);
-                alert("Error: Asegúrate de que el archivo 'MODELO_3.docx' esté en la carpeta raíz de tu GitHub.");
+                alert("Error crítico: Asegúrate de que los archivos 'MODELO_3.docx' y 'MODELO_3_FIRMADO.docx' estén subidos en tu repositorio.");
             }
         }
     </script>
