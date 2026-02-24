@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiscalía Digital - Generador de Disposiciones</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.28.5/docxtemplater.js"></script>
+    <script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>⚖️ Generador de Disposición de Libertad</h1>
+        <p>Complete los campos para generar el documento basado en el <strong>Modelo 3</strong>.</p>
+    </header>
+
+    <main>
+        <form id="docForm">
+            <div class="row">
+                <div class="column">
+                    <label for="num_disp">N° Disposición</label>
+                    <input type="text" id="num_disp" placeholder="Ej: 01-2026" required>
+
+                    <label for="fecha_disp">Fecha de Disposición (Piura, ...)</label>
+                    <input type="text" id="fecha_disp" placeholder="Ej: 24 de febrero" required>
+
+                    <label for="nombre">Nombre del Imputado</label>
+                    <input type="text" id="nombre" placeholder="Nombre completo" required>
+                </div>
+                <div class="column">
+                    <label for="fecha_hechos">Fecha de los Hechos</label>
+                    <input type="text" id="fecha_hechos" placeholder="Ej: 20 de febrero de 2026" required>
+
+                    <label for="fecha_int">Fecha Intervención Policial</label>
+                    <input type="text" id="fecha_int" placeholder="Ej: 20 de febrero de 2026" required>
+
+                    <label for="num_dosaje">N° Certificado Dosaje</label>
+                    <input type="text" id="num_dosaje" placeholder="Ej: 0022-005432" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="column">
+                    <label for="res_dosaje">Resultado Dosaje (Numérico)</label>
+                    <input type="number" step="0.01" id="res_dosaje" placeholder="Ej: 0.47" required>
+                </div>
+                <div class="column">
+                    <label>Datos del Vehículo</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="vehiculo" placeholder="Vehículo" required>
+                        <input type="text" id="placa" placeholder="Placa" required>
+                    </div>
+                </div>
+            </div>
+
+            <label for="hechos">Hechos Indagados</label>
+            <textarea id="hechos" rows="4" placeholder="Describa brevemente la intervención..." required></textarea>
+
+            <div class="actions">
+                <button type="button" class="btn-primary" onclick="generarDocumento()">🚀 Generar y Descargar Word</button>
+                <button type="reset" class="btn-secondary">Limpiar Formulario</button>
+            </div>
+        </form>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
