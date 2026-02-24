@@ -3,158 +3,355 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador Fiscal - Proyecto Omar</title>
+    <title>CEE Libertad - Proyecto Omar</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.28.5/docxtemplater.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        body { max-width: 800px; margin: auto; padding: 20px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .caja-opcional {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px dashed #ccc;
-            margin: 15px 0;
-            display: none; 
+        :root {
+            --primary: #2563eb;
+            --success: #22c55e;
+            --success-hover: #16a34a;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
         }
-        .visible { display: block !important; }
-        .caja-firma { background-color: #f0f4f8; padding: 15px; border-radius: 8px; margin: 15px 0; }
-        .check-group { display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: bold; }
-        input[type="checkbox"] { width: 20px; height: 20px; margin: 0; }
-        h1 { text-align: center; color: #0056b3; }
+
+        * { box-sizing: border-box; transition: all 0.3s ease; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin-top: 20px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { 
+            text-align: center; 
+            color: var(--primary); 
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .input-group { margin-bottom: 15px; }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: #fdfdfd;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            background: white;
+        }
+
+        /* Caja de Opciones (Firma y Vehículo) */
+        .option-card {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .option-card:hover { background: #e2e8f0; }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 45px;
+            height: 24px;
+            margin-right: 15px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e1;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px; width: 18px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(21px); }
+
+        .vehicle-fields {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; max-height: 0; }
+            to { opacity: 1; max-height: 200px; }
+        }
+
+        .btn-download {
+            width: 100%;
+            background-color: var(--success);
+            color: white;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+            margin-top: 20px;
+        }
+
+        .btn-download:hover {
+            background-color: var(--success-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(34, 197, 94, 0.4);
+        }
+
+        .btn-download:active { transform: translateY(0); }
+
+        /* Mobile Friendly */
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            .grid { grid-template-columns: 1fr; }
+            .vehicle-fields { grid-template-columns: 1fr; }
+            h1 { font-size: 1.5rem; }
+        }
     </style>
 </head>
 <body>
 
-    <h1>⚖️ CEE LIBERTAD - PROYECTO OMAR</h1>
-    <hr>
+<div class="container">
+    <h1>⚖️ CEE LIBERTAD</h1>
+    <div class="subtitle">PROYECTO OMAR - SISTEMA FISCAL</div>
 
     <form id="docForm">
-        <div class="grid">
-            <div>
-                <label for="num_disp">N° Disposición</label>
+        <div class="form-section">
+            <div class="input-group">
+                <label>N° Disposición</label>
                 <input type="text" id="num_disp" value="01-2026">
-                
-                <label for="dni">DNI del Imputado</label>
-                <input type="text" id="dni" maxlength="8">
-                
-                <label for="nombre">Nombre Completo del Imputado</label>
-                <input type="text" id="nombre" placeholder="EJ: CARLOS PEREZ GOMEZ">
             </div>
-            <div>
-                <label for="fecha_disp">Fecha de Hoy (Disposición)</label>
+            <div class="input-group">
+                <label>DNI Imputado</label>
+                <input type="text" id="dni" maxlength="8" placeholder="8 dígitos">
+            </div>
+            <div class="input-group full-width">
+                <label>Nombre Completo del Imputado</label>
+                <input type="text" id="nombre" placeholder="Ej: CARLOS PEREZ GOMEZ">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="input-group">
+                <label>Fecha de Disposición</label>
                 <input type="text" id="fecha_disp">
-                
-                <label for="fecha_hechos">Fecha de los Hechos</label>
+            </div>
+            <div class="input-group">
+                <label>Fecha de los Hechos</label>
                 <input type="text" id="fecha_hechos" placeholder="Ej: 23 de febrero de 2026">
             </div>
         </div>
 
-        <div class="caja-firma">
-            <label class="check-group">
+        <label class="option-card">
+            <div class="switch">
                 <input type="checkbox" id="check_vehiculo" onchange="toggleVehiculo()">
-                ¿HABRÁ DEVOLUCIÓN DE VEHÍCULO?
-            </label>
-        </div>
+                <span class="slider"></span>
+            </div>
+            <div>
+                <strong>¿Habrá devolución de vehículo?</strong>
+                <div style="font-size: 0.75rem; color: #64748b;">Habilita el punto 2 del documento</div>
+            </div>
+        </label>
 
-        <div id="seccion_vehiculo_campos" class="caja-opcional">
-            <div class="grid">
-                <label>Vehículo (Marca/Modelo) <input type="text" id="vehiculo"></label>
-                <label>N° Placa <input type="text" id="placa"></label>
+        <div id="seccion_vehiculo_campos" class="vehicle-fields">
+            <div class="input-group">
+                <label>Vehículo</label>
+                <input type="text" id="vehiculo" placeholder="Marca/Modelo">
+            </div>
+            <div class="input-group">
+                <label>N° Placa</label>
+                <input type="text" id="placa" placeholder="0000-XX">
             </div>
         </div>
 
-        <label for="hechos">Hechos Indagados</label>
-        <textarea id="hechos" rows="3"></textarea>
-
-        <div class="grid">
-            <label>N° Certificado Dosaje <input type="text" id="num_dosaje"></label>
-            <label>Resultado (Número) <input type="number" step="0.01" id="res_dosaje" value="0.47"></label>
+        <div class="input-group">
+            <label>Resumen de Hechos Indagados</label>
+            <textarea id="hechos" rows="3" placeholder="Detalle breve de la intervención policial..."></textarea>
         </div>
 
-        <div class="caja-firma">
-            <label class="check-group">
+        <div class="form-section">
+            <div class="input-group">
+                <label>Certificado Dosaje</label>
+                <input type="text" id="num_dosaje" placeholder="N° Certificado">
+            </div>
+            <div class="input-group">
+                <label>Resultado (G/L)</label>
+                <input type="number" step="0.01" id="res_dosaje" value="0.47">
+            </div>
+        </div>
+
+        <label class="option-card">
+            <div class="switch">
                 <input type="checkbox" id="check_firma">
-                ¿CONSIGNAR FIRMA EN EL DOCUMENTO?
-            </label>
-        </div>
+                <span class="slider"></span>
+            </div>
+            <div>
+                <strong>¿Consignar firma digital?</strong>
+                <div style="font-size: 0.75rem; color: #64748b;">Usará el modelo con firma incorporada</div>
+            </div>
+        </label>
 
-        <button type="button" onclick="generarDocumento()"> DESCARGAR DISPOSICIÓN EN FORMATO WORD</button>
+        <button type="button" class="btn-download" onclick="generarDocumento()">
+            📄 GENERAR DISPOSICIÓN WORD
+        </button>
     </form>
+</div>
 
-    <script>
-        function toggleVehiculo() {
-            const seccion = document.getElementById('seccion_vehiculo_campos');
-            seccion.classList.toggle('visible', document.getElementById('check_vehiculo').checked);
+<script>
+    function toggleVehiculo() {
+        const seccion = document.getElementById('seccion_vehiculo_campos');
+        const isChecked = document.getElementById('check_vehiculo').checked;
+        seccion.style.display = isChecked ? 'grid' : 'none';
+    }
+
+    window.onload = function() {
+        const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+        const f = new Date();
+        document.getElementById('fecha_disp').value = `Piura, ${f.getDate()} de ${meses[f.getMonth()]} de ${f.getFullYear()}`;
+    };
+
+    function convertirDosajeALetras(num) {
+        const valor = parseFloat(num);
+        if (isNaN(valor)) return "";
+        const partes = valor.toFixed(2).split('.');
+        const unidades = ["cero", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
+        return `${unidades[parseInt(partes[0])] || partes[0]} gramos con ${partes[1]} centigramos de alcohol por litro de sangre`;
+    }
+
+    async function generarDocumento() {
+        const conFirma = document.getElementById('check_firma').checked;
+        const conVehiculo = document.getElementById('check_vehiculo').checked;
+        const nombreImputado = document.getElementById('nombre').value.toUpperCase().trim();
+        
+        const archivoModelo = conFirma ? 'MODELO_3_FIRMADO.docx' : 'MODELO_3.docx';
+
+        if (!nombreImputado) {
+            alert("⚠️ Por favor, ingrese el nombre del imputado.");
+            return;
         }
 
-        window.onload = function() {
-            const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-            const f = new Date();
-            document.getElementById('fecha_disp').value = `Piura, ${f.getDate()} de ${meses[f.getMonth()]} de ${f.getFullYear()}`;
+        const data = {
+            NUMERO_DISPOSICION: document.getElementById('num_disp').value,
+            FECHA_DISPOSICION: document.getElementById('fecha_disp').value,
+            NOMBRE_IMPUTADO: nombreImputado,
+            NUMERO_DNI: document.getElementById('dni').value,
+            FECHA_DE_HECHOS: document.getElementById('fecha_hechos').value,
+            HECHOS: document.getElementById('hechos').value,
+            NUMER_DOSAJE: document.getElementById('num_dosaje').value,
+            RESULTADO_DOSAJE: document.getElementById('res_dosaje').value + " G/L",
+            RESULTADO_DOSAJE_LETRAS: convertirDosajeALetras(document.getElementById('res_dosaje').value),
+            mostrar_vehiculo: conVehiculo, 
+            VEHICULO: document.getElementById('vehiculo').value.toUpperCase(),
+            PLACA: document.getElementById('placa').value.toUpperCase()
         };
 
-        function convertirDosajeALetras(num) {
-            const valor = parseFloat(num);
-            if (isNaN(valor)) return "";
-            const partes = valor.toFixed(2).split('.');
-            const unidades = ["cero", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
-            return `${unidades[parseInt(partes[0])] || partes[0]} gramos con ${partes[1]} centigramos de alcohol por litro de sangre`;
+        try {
+            const response = await fetch(archivoModelo);
+            const content = await response.arrayBuffer();
+            const zip = new PizZip(content);
+            const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+
+            doc.render(data);
+
+            const out = doc.getZip().generate({
+                type: "blob",
+                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            });
+
+            saveAs(out, `CCE LIBERTAD ${nombreImputado}.docx`);
+        } catch (error) {
+            alert("❌ Error: No se pudieron cargar los modelos desde GitHub.");
         }
+    }
+</script>
 
-        async function generarDocumento() {
-            const conFirma = document.getElementById('check_firma').checked;
-            const conVehiculo = document.getElementById('check_vehiculo').checked;
-            const nombreImputado = document.getElementById('nombre').value.toUpperCase().trim();
-            
-            const archivoModelo = conFirma ? 'MODELO_3_FIRMADO.docx' : 'MODELO_3.docx';
-
-            if (!nombreImputado) {
-                alert("Por favor, ingrese el nombre del imputado.");
-                return;
-            }
-
-            const data = {
-                NUMERO_DISPOSICION: document.getElementById('num_disp').value,
-                FECHA_DISPOSICION: document.getElementById('fecha_disp').value,
-                NOMBRE_IMPUTADO: nombreImputado,
-                NUMERO_DNI: document.getElementById('dni').value,
-                FECHA_DE_HECHOS: document.getElementById('fecha_hechos').value,
-                HECHOS: document.getElementById('hechos').value,
-                NUMER_DOSAJE: document.getElementById('num_dosaje').value,
-                RESULTADO_DOSAJE: document.getElementById('res_dosaje').value + " G/L",
-                RESULTADO_DOSAJE_LETRAS: convertirDosajeALetras(document.getElementById('res_dosaje').value),
-                mostrar_vehiculo: conVehiculo, 
-                VEHICULO: document.getElementById('vehiculo').value.toUpperCase(),
-                PLACA: document.getElementById('placa').value.toUpperCase()
-            };
-
-            try {
-                const response = await fetch(archivoModelo);
-                const content = await response.arrayBuffer();
-                const zip = new PizZip(content);
-                const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
-
-                doc.render(data);
-
-                const out = doc.getZip().generate({
-                    type: "blob",
-                    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                });
-
-                // CAMBIO SOLICITADO: Nombre del archivo dinámico
-                const nombreArchivoDescarga = `CCE LIBERTAD ${nombreImputado}.docx`;
-                saveAs(out, nombreArchivoDescarga);
-
-            } catch (error) {
-                alert("Error al cargar los modelos .docx. Revisa tu repositorio de GitHub.");
-            }
-        }
-    </script>
 </body>
 </html>
