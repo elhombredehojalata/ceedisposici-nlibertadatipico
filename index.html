@@ -1,41 +1,60 @@
-function convertirDosajeALetras(num) {
-    var valor = parseFloat(num);
-    if (isNaN(valor)) return "";
-    var partes = valor.toFixed(2).split('.');
-    var enteros = parseInt(partes[0]);
-    var decimales = parseInt(partes[1]);
-    var unidades = ["cero", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"];
-    var textoEnteros = enteros === 0 ? "cero" : unidades[enteros] || enteros;
-    return textoEnteros + " gramos con " + decimales + " centigramos de alcohol por litro de sangre";
-}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Generador Fiscal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.28.5/docxtemplater.js"></script>
+    <script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+</head>
+<body>
+    <h1>⚖️ Generador de Libertad</h1>
+    <form id="docForm">
+        <label>N° Disposición: <input type="text" id="num_disp" value="01-2026"></label>
+        <label>Fecha Hoy: <input type="text" id="fecha_disp" value="24 de febrero"></label>
+        <label>Nombre Imputado: <input type="text" id="nombre" value="JUAN PEREZ"></label>
+        <label>Vehículo: <input type="text" id="vehiculo" value="CAMIONETA"></label>
+        <label>Placa: <input type="text" id="placa" value="ABC-123"></label>
+        <label>Dosaje (Número): <input type="number" step="0.01" id="res_dosaje" value="0.47"></label>
+        <button type="button" onclick="generar()">GENERAR WORD</button>
+    </form>
 
-async function generarDocumento() {
-    var resNum = document.getElementById('res_dosaje').value;
-    var data = {
-        NUMERO_DISPOSICION: document.getElementById('num_disp').value,
-        FECHA_DISPOSICION: document.getElementById('fecha_disp').value,
-        NOMBRE_IMPUTADO: document.getElementById('nombre').value.toUpperCase(),
-        HECHOS: document.getElementById('hechos').value,
-        FECHA_DE_HECHOS: document.getElementById('fecha_hechos').value,
-        FECHA_DE_INTERVENCION_POLICIAL: document.getElementById('fecha_int').value,
-        NUMER_DOSAJE: document.getElementById('num_dosaje').value,
-        RESULTADO_DOSAJE: resNum + " G/L",
-        RESULTADO_DOSAJE_LETRAS: convertirDosajeALetras(resNum),
-        VEHICULO: document.getElementById('vehiculo').value.toUpperCase(),
-        PLACA: document.getElementById('placa').value.toUpperCase()
-    };
+    <script>
+    async function generar() {
+        try {
+            const response = await fetch('MODELO_3.docx'); [cite_start]// [cite: 63-93]
+            if (!response.ok) {
+                alert("No se encuentra el archivo MODELO_3.docx en la misma carpeta.");
+                return;
+            }
+            const content = await response.arrayBuffer();
+            const zip = new PizZip(content);
+            const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
 
-    try {
-        var response = await fetch('MODELO_3.docx');
-        if (!response.ok) throw new Error("Archivo no encontrado");
-        var content = await response.arrayBuffer();
-        var zip = new PizZip(content);
-        var doc = new window.docxtemplater(zip, {paragraphLoop: true, linebreaks: true});
-        doc.render(data);
-        var out = doc.getZip().generate({type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
-        saveAs(out, "Libertad_" + data.NOMBRE_IMPUTADO + ".docx");
-    } catch (error) {
-        alert("Error: Revisa que MODELO_3.docx esté en GitHub y que todos los campos estén llenos.");
-        console.log(error);
+            const data = {
+                NUMERO_DISPOSICION: document.getElementById('num_disp').value,
+                FECHA_DISPOSICION: document.getElementById('fecha_disp').value,
+                NOMBRE_IMPUTADO: document.getElementById('nombre').value.toUpperCase(),
+                VEHICULO: document.getElementById('vehiculo').value.toUpperCase(),
+                PLACA: document.getElementById('placa').value.toUpperCase(),
+                RESULTADO_DOSAJE: document.getElementById('res_dosaje').value + " G/L"
+                // El resto de variables del Modelo 3 deben ir aquí
+            };
+
+            doc.render(data);
+
+            const out = doc.getZip().generate({
+                type: "blob",
+                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            });
+
+            saveAs(out, "Documento_Generado.docx");
+        } catch (error) {
+            console.error(error);
+            alert("Error crítico: Mira la consola (F12)");
+        }
     }
-}
+    </script>
+</body>
+</html>
