@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador Fiscal - Proyecto Omar</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.28.5/docxtemplater.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
     
     <style>
@@ -18,12 +20,13 @@
             border-radius: 8px;
             border: 1px dashed #ccc;
             margin: 15px 0;
-            display: none; /* Oculto por defecto */
+            display: none; 
         }
         .visible { display: block !important; }
         .caja-firma { background-color: #f0f4f8; padding: 15px; border-radius: 8px; margin: 15px 0; }
         .check-group { display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: bold; }
         input[type="checkbox"] { width: 20px; height: 20px; margin: 0; }
+        h1 { text-align: center; color: #0056b3; }
     </style>
 </head>
 <body>
@@ -34,20 +37,20 @@
     <form id="docForm">
         <div class="grid">
             <div>
-                <label>N° Disposición</label>
+                <label for="num_disp">N° Disposición</label>
                 <input type="text" id="num_disp" value="01-2026">
                 
-                <label>DNI Imputado</label>
+                <label for="dni">DNI del Imputado</label>
                 <input type="text" id="dni" maxlength="8">
                 
-                <label>Nombre Completo</label>
-                <input type="text" id="nombre">
+                <label for="nombre">Nombre Completo del Imputado</label>
+                <input type="text" id="nombre" placeholder="EJ: CARLOS PEREZ GOMEZ">
             </div>
             <div>
-                <label>Fecha de Hoy</label>
+                <label for="fecha_disp">Fecha de Hoy (Disposición)</label>
                 <input type="text" id="fecha_disp">
                 
-                <label>Fecha de los Hechos</label>
+                <label for="fecha_hechos">Fecha de los Hechos</label>
                 <input type="text" id="fecha_hechos" placeholder="Ej: 23 de febrero de 2026">
             </div>
         </div>
@@ -61,12 +64,12 @@
 
         <div id="seccion_vehiculo_campos" class="caja-opcional">
             <div class="grid">
-                <label>Vehículo (Marca/Modelo) <input type="text" id="vehiculo" placeholder="Ej: Camioneta Toyota"></label>
-                <label>N° Placa <input type="text" id="placa" placeholder="Ej: P1A-999"></label>
+                <label>Vehículo (Marca/Modelo) <input type="text" id="vehiculo"></label>
+                <label>N° Placa <input type="text" id="placa"></label>
             </div>
         </div>
 
-        <label>Hechos Indagados</label>
+        <label for="hechos">Hechos Indagados</label>
         <textarea id="hechos" rows="3"></textarea>
 
         <div class="grid">
@@ -85,7 +88,6 @@
     </form>
 
     <script>
-        // Función para mostrar/ocultar campos de vehículo
         function toggleVehiculo() {
             const seccion = document.getElementById('seccion_vehiculo_campos');
             seccion.classList.toggle('visible', document.getElementById('check_vehiculo').checked);
@@ -108,20 +110,25 @@
         async function generarDocumento() {
             const conFirma = document.getElementById('check_firma').checked;
             const conVehiculo = document.getElementById('check_vehiculo').checked;
+            const nombreImputado = document.getElementById('nombre').value.toUpperCase().trim();
+            
             const archivoModelo = conFirma ? 'MODELO_3_FIRMADO.docx' : 'MODELO_3.docx';
+
+            if (!nombreImputado) {
+                alert("Por favor, ingrese el nombre del imputado.");
+                return;
+            }
 
             const data = {
                 NUMERO_DISPOSICION: document.getElementById('num_disp').value,
                 FECHA_DISPOSICION: document.getElementById('fecha_disp').value,
-                NOMBRE_IMPUTADO: document.getElementById('nombre').value.toUpperCase(),
+                NOMBRE_IMPUTADO: nombreImputado,
                 NUMERO_DNI: document.getElementById('dni').value,
                 FECHA_DE_HECHOS: document.getElementById('fecha_hechos').value,
                 HECHOS: document.getElementById('hechos').value,
                 NUMER_DOSAJE: document.getElementById('num_dosaje').value,
                 RESULTADO_DOSAJE: document.getElementById('res_dosaje').value + " G/L",
                 RESULTADO_DOSAJE_LETRAS: convertirDosajeALetras(document.getElementById('res_dosaje').value),
-                
-                // Lógica condicional para el Word
                 mostrar_vehiculo: conVehiculo, 
                 VEHICULO: document.getElementById('vehiculo').value.toUpperCase(),
                 PLACA: document.getElementById('placa').value.toUpperCase()
@@ -140,9 +147,12 @@
                     mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 });
 
-                saveAs(out, `Disposicion_${data.NUMERO_DNI}.docx`);
+                // CAMBIO SOLICITADO: Nombre del archivo dinámico
+                const nombreArchivoDescarga = `CCE LIBERTAD ${nombreImputado}.docx`;
+                saveAs(out, nombreArchivoDescarga);
+
             } catch (error) {
-                alert("Error al cargar los modelos .docx");
+                alert("Error al cargar los modelos .docx. Revisa tu repositorio de GitHub.");
             }
         }
     </script>
