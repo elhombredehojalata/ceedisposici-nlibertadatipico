@@ -3,54 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGP - Sistema de Generación Proyectada</title>
+    <title>SGP - CEE Libertad</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.28.5/docxtemplater.js"></script>
     <script src="https://unpkg.com/pizzip@3.1.1/dist/pizzip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --primary: #2563eb;
-            --success: #22c55e; --border: #e2e8f0; --label: #475569;
+            --bg: #f1f5f9; --card: #ffffff; --text: #1e293b; --primary: #2563eb;
+            --success: #22c55e; --border: #cbd5e1; --label: #475569;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --primary: #3b82f6;
-                --success: #10b981; --border: #334155; --label: #94a3b8;
-            }
+        /* Estilos Modo Oscuro Manual */
+        body.dark-mode {
+            --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --primary: #3b82f6;
+            --success: #10b981; --border: #334155; --label: #94a3b8;
         }
 
-        * { box-sizing: border-box; transition: background 0.3s, color 0.3s; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; }
+        * { box-sizing: border-box; transition: 0.2s ease; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
 
-        .app-container { width: 100%; max-width: 850px; background: var(--card); padding: 40px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .app-container { width: 100%; max-width: 850px; background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         
-        h1 { font-size: 1.75rem; font-weight: 700; color: var(--primary); text-align: center; margin-bottom: 30px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        /* Botón Modo Oscuro */
+        .theme-toggle { align-self: flex-end; margin-bottom: 10px; background: var(--card); border: 1px solid var(--border); padding: 8px 15px; border-radius: 50px; cursor: pointer; color: var(--text); font-weight: 600; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; }
+
+        h1 { font-size: 1.6rem; color: var(--primary); text-align: center; margin-top: 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
         
-        label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--label); margin-bottom: 8px; }
+        label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--label); margin-bottom: 5px; text-transform: uppercase; }
         input, textarea { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 1rem; }
         input:focus { outline: 2px solid var(--primary); border-color: transparent; }
 
-        /* Estilo de Opciones */
-        .option-box { background: rgba(148, 163, 184, 0.1); padding: 15px; border-radius: 12px; margin: 15px 0; display: flex; align-items: center; gap: 15px; cursor: pointer; }
-        .switch { position: relative; width: 44px; height: 22px; background: #94a3b8; border-radius: 20px; }
-        .switch::after { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; }
+        .option-box { background: rgba(148, 163, 184, 0.1); padding: 15px; border-radius: 12px; margin: 15px 0; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .switch { position: relative; width: 40px; height: 20px; background: #94a3b8; border-radius: 20px; }
+        .switch::after { content: ''; position: absolute; width: 16px; height: 16px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; }
         input:checked + .switch { background: var(--success); }
-        input:checked + .switch::after { transform: translateX(22px); }
+        input:checked + .switch::after { transform: translateX(20px); }
 
-        .btn-main { width: 100%; background: var(--success); color: white; padding: 18px; border-radius: 12px; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .btn-main:hover { opacity: 0.9; transform: scale(1.01); }
+        .btn-main { width: 100%; background: var(--success); color: white; padding: 18px; border-radius: 12px; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-top: 20px; }
+        .btn-main:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
-        /* Modal de Resumen */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card); width: 100%; max-width: 600px; padding: 30px; border-radius: 20px; max-height: 90vh; overflow-y: auto; }
-        .resumen-item { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-        .resumen-label { font-size: 0.8rem; color: var(--label); font-weight: 700; text-transform: uppercase; }
-        .resumen-val { font-size: 1.1rem; font-weight: 500; }
+        /* Modal */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card); width: 100%; max-width: 550px; padding: 30px; border-radius: 20px; }
+        .resumen-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .resumen-label { font-size: 0.8rem; color: var(--label); font-weight: 700; }
+        .resumen-val { font-size: 1rem; font-weight: 600; text-align: right; }
 
         .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
         .btn-edit { background: #64748b; color: white; padding: 12px; border-radius: 10px; border: none; cursor: pointer; }
@@ -59,29 +60,44 @@
 </head>
 <body>
 
+<button class="theme-toggle" onclick="document.body.classList.toggle('dark-mode')">
+    🌓 CAMBIAR MODO (CLARO/OSCURO)
+</button>
+
 <div class="app-container">
-    <h1>⚖️ CEE LIBERTAD</h1>
+    <h1>⚖️ CEE LIBERTAD - PROYECTO OMAR</h1>
     
     <form id="docForm">
         <div class="grid">
             <div>
-                <label>DNI Imputado</label>
-                <input type="text" id="dni" maxlength="8" placeholder="8 dígitos">
+                <label>Nombre del Imputado</label>
+                <input type="text" id="nombre" placeholder="Nombre completo">
             </div>
             <div>
-                <label>Nombre Completo</label>
-                <input type="text" id="nombre" placeholder="CARLOS PEREZ GOMEZ">
+                <label>DNI</label>
+                <input type="text" id="dni" maxlength="8">
             </div>
         </div>
 
-        <div class="grid" style="margin-top: 20px;">
+        <div class="grid">
+            <div>
+                <label>Fecha de Disposición (Hoy)</label>
+                <input type="text" id="fecha_disp">
+            </div>
             <div>
                 <label>N° Disposición</label>
                 <input type="text" id="num_disp" value="01-2026">
             </div>
+        </div>
+
+        <div class="grid">
             <div>
                 <label>Fecha de los Hechos</label>
-                <input type="text" id="fecha_hechos" placeholder="24 de febrero de 2026">
+                <input type="text" id="fecha_hechos" placeholder="Ej: 24 de febrero de 2026">
+            </div>
+            <div>
+                <label>Certificado Dosaje</label>
+                <input type="text" id="num_dosaje">
             </div>
         </div>
 
@@ -92,66 +108,68 @@
         </label>
 
         <div id="fields_vehiculo" class="grid" style="display: none; background: rgba(148,163,184,0.05); padding: 15px; border-radius: 12px;">
-            <div><label>Vehículo</label><input type="text" id="vehiculo"></div>
+            <div><label>Marca/Modelo</label><input type="text" id="vehiculo"></div>
             <div><label>Placa</label><input type="text" id="placa"></div>
         </div>
 
-        <div style="margin-top: 20px;">
-            <label>Resumen de Hechos</label>
+        <div style="margin-top: 15px;">
+            <label>Hechos Indagados</label>
             <textarea id="hechos" rows="3"></textarea>
         </div>
 
-        <div class="grid" style="margin-top: 20px;">
-            <div><label>Certificado Dosaje</label><input type="text" id="num_dosaje"></div>
-            <div><label>Resultado (G/L)</label><input type="number" id="res_dosaje" value="0.47" step="0.01"></div>
+        <div class="grid">
+            <div><label>Resultado Dosaje (G/L)</label><input type="number" id="res_dosaje" value="0.47" step="0.01"></div>
+            <div style="display:flex; align-items:flex-end;">
+                <label class="option-box" style="margin:0; width:100%;">
+                    <input type="checkbox" id="check_firma" hidden>
+                    <div class="switch"></div>
+                    <strong>Consignar Firma Digital</strong>
+                </label>
+            </div>
         </div>
 
-        <label class="option-box">
-            <input type="checkbox" id="check_firma" hidden>
-            <div class="switch"></div>
-            <strong>¿Consignar Firma Digital?</strong>
-        </label>
-
-        <button type="button" class="btn-main" onclick="abrirResumen()">📄 VER RESUMEN Y GENERAR</button>
+        <button type="button" class="btn-main" onclick="abrirResumen()">🔍 VER RESUMEN Y DESCARGAR</button>
     </form>
 </div>
 
 <div id="modalResumen" class="modal">
     <div class="modal-content">
-        <h2 style="margin-top:0">🔍 Revisión de Datos</h2>
+        <h2 style="margin-top:0; color: var(--primary);">📝 Ficha de Resumen</h2>
         <div id="listaResumen"></div>
         <div class="modal-btns">
             <button class="btn-edit" onclick="cerrarResumen()">⬅️ CORREGIR</button>
-            <button class="btn-confirm" onclick="procesarWord()">✅ TODO CORRECTO</button>
+            <button class="btn-confirm" onclick="procesarWord()">🚀 GENERAR WORD</button>
         </div>
     </div>
 </div>
 
 <script>
-    // Fecha automática de disposición
-    const f = new Date();
-    const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-    const fechaActual = `Piura, ${f.getDate()} de ${meses[f.getMonth()]} de ${f.getFullYear()}`;
+    // Inicializar Fecha de Hoy
+    window.onload = function() {
+        const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+        const f = new Date();
+        document.getElementById('fecha_disp').value = `Piura, ${f.getDate()} de ${meses[f.getMonth()]} de ${f.getFullYear()}`;
+    };
 
     function abrirResumen() {
-        const nombre = document.getElementById('nombre').value;
+        const nombre = document.getElementById('nombre').value.trim();
         if (!nombre) return alert("Ingrese el nombre del imputado");
 
         const dataResumen = [
             { l: "Imputado", v: nombre.toUpperCase() },
-            { l: "DNI", v: document.getElementById('dni').value },
-            { l: "Disposición", v: document.getElementById('num_disp').value },
+            { l: "Fecha Disposición", v: document.getElementById('fecha_disp').value },
             { l: "Fecha Hechos", v: document.getElementById('fecha_hechos').value },
-            { l: "Vehículo", v: document.getElementById('check_vehiculo').checked ? document.getElementById('vehiculo').value : "NO APLICA" },
+            { l: "Vehículo", v: document.getElementById('check_vehiculo').checked ? document.getElementById('vehiculo').value : "NO" },
             { l: "Firma", v: document.getElementById('check_firma').checked ? "SI" : "NO" }
         ];
 
-        let html = "";
-        dataResumen.forEach(item => {
-            html += `<div class="resumen-item"><div class="resumen-label">${item.l}</div><div class="resumen-val">${item.v || '---'}</div></div>`;
-        });
+        document.getElementById('listaResumen').innerHTML = dataResumen.map(i => `
+            <div class="resumen-item">
+                <span class="resumen-label">${i.l}</span>
+                <span class="resumen-val">${i.v || '---'}</span>
+            </div>
+        `).join('');
         
-        document.getElementById('listaResumen').innerHTML = html;
         document.getElementById('modalResumen').style.display = 'flex';
     }
 
@@ -172,7 +190,7 @@
 
         const data = {
             NUMERO_DISPOSICION: document.getElementById('num_disp').value,
-            FECHA_DISPOSICION: fechaActual,
+            FECHA_DISPOSICION: document.getElementById('fecha_disp').value,
             NOMBRE_IMPUTADO: nombre,
             NUMERO_DNI: document.getElementById('dni').value,
             FECHA_DE_HECHOS: document.getElementById('fecha_hechos').value,
@@ -187,6 +205,7 @@
 
         try {
             const resp = await fetch(archivo);
+            if(!resp.ok) throw new Error();
             const blob = await resp.arrayBuffer();
             const zip = new PizZip(blob);
             const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
@@ -194,7 +213,7 @@
             const out = doc.getZip().generate({ type: "blob" });
             saveAs(out, `CCE LIBERTAD ${nombre}.docx`);
         } catch (e) {
-            alert("Error al procesar archivos base.");
+            alert("Error: Asegúrate de que los archivos .docx están en tu GitHub.");
         }
     }
 </script>
